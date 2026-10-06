@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+   
+    <style>
+        body{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+        }
+        body.dark{
+            background-color: black;
+        }
+        .select {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            border: 2px solid black;
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+        }
+        .select select {
+            padding: 0.5rem;
+            background: none;
+            border: 0;
+            outline: 0;
+            font: inherit;
+            color: black;
+        }
+        main {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 70px;
+            margin-bottom: 1.5rem;
+        }
+
+        form {
+            position: relative;
+            width: 100%;
+        }
+
+        form input[type="text"] {
+            padding: 0.8rem 1rem;
+            width: 94%;
+            border: none;
+            outline: none;
+            font: inherit;
+            font-size: 1.3rem;
+            color:white;
+            border-radius: 1.3rem;
+            background-color: black;
+        }
+
+        form button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            padding-inline: 2rem;
+            border-radius: 1.3rem;
+            border: 0;
+            font: inherit;
+            font-size: 1.3rem;
+            outline: 0;
+            background: grey;
+            color: black;
+        }
+
+        form button:hover {
+            background-color: darkgrey;
+
+        }
+
+        form button:active {
+            transform: scale(0.8);
+            background-color: black;
+        }
+
+        .theme{
+            position: absolute;
+            top: 30px;
+            right: 30px;
+        }
+        .theme button{
+            color: black;
+            background-color: white;
+            width: 40px;
+            height: 40px;
+            border: 2px solid black ;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+        ul {
+            width: 100%;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-left: 0px;
+        }
+
+        li{
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            background-color: black;
+            padding: 0.8rem 1rem;
+            border-radius: 1.3rem;
+            color: white;
+        }  
+
+        input[type="checkbox"]{
+            display: none;
+        }
+
+        input[type="checkbox"]:checked+label {
+                background-color: green;
+            }
+
+            input[type="checkbox"]:checked~label:last-child {
+                text-decoration: line-through;
+                color: white;
+            } 
+
+            .t-icon {
+                height: 25px;
+                width: 25px;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                background-color: red;
+                color: white;
+                border-radius: 100%;
+            }
+
+            li button {
+                background: none;
+                border: none;
+                font-size: 1.3rem;
+                cursor: pointer;
+                color: white;
+                height: 25px;
+                width: 25px;
+            }
+    </style>
+</head>
+<body>
+    <div class="select">
+        <select name="" id="select">
+            <option value="all">All</option>
+            <option value="complated">Complated</option>
+            <option value="pending">Pending</option>
+        </select>
+    </div>
+    <main>
+        <h1>Goal Setter</h1>
+        <form>
+            <input type="text" class="todo-text" placeholder="What's on your mind today?">
+            <button type="submit">Add</button>
+        </form>
+        <ul class="todo-list">
+            
+        </ul>
+    </main>
+ 
+
+
+
+    <script>
+        let list = document.querySelector('.todo-list');
+        let form = document.querySelector('form');
+        let input = document.querySelector('form input[type = "text"]');
+        let btn = document.querySelector('form button');
+        let alltodo = [];
+
+        let settodo = () =>{
+            localStorage.setItem("alltodo" , JSON.stringify(alltodo));
+        }
+        
+        let gettodo = () =>{
+            let gettodo = localStorage.getItem("alltodo");
+            if(gettodo){
+                alltodo = JSON.parse(gettodo)
+            }
+        }
+        gettodo();
+
+        let createtodo = () => {
+            list.innerHTML = '';
+            alltodo.forEach((todo,index)=>{
+                console.log(todo.title);
+                
+
+                let todos = document.createElement('li');
+                todos.classList.add("todos");
+                todos.innerHTML = `<div>
+                                    <input type="checkbox" id="${index}" ${todo.complated ? "checked" : ""}>
+                                    <label for="${index}" class="t-icon"><i class="fa-solid fa-check"></i></label>
+                                    <label for="${index}">${todo.title}</label>
+
+                                    </div>
+                                    <button class="delete"><i class="fa-solid fa-trash-can"></i></button>`;
+                                        let checkbox = todos.querySelector("input[type='checkbox']");
+                                        checkbox.addEventListener("click",()=>{
+                                            alltodo[index].complated = checkbox.checked;
+                                            settodo();
+                                            createtodo();
+                                            
+                                        })
+
+                                     let deletebtn = todos.querySelector('.delete');
+                                     deletebtn.addEventListener('click',() => {
+                                         alltodo = alltodo.filter((_, i) => i !== index);
+                                         settodo();
+                                         createtodo();
+                                 })
+                    list.appendChild(todos);
+            })
+        }
+        createtodo();
+
+
+        form.addEventListener("submit",(e)=>{
+            e.preventDefault();
+            if(input.value.trim() !== ""){
+                alltodo.push({title : input.value.trim(),complated:false});
+                settodo();
+                createtodo();
+                input.value = "";
+            }
+        })
+
+
+        let filter = document.querySelector('#select');
+
+        filter.addEventListener('change',(e)=>{
+            let filtervalue = e.target.value;
+            
+            filtertodo(filtervalue);
+        })
+
+        let filtertodo = (filtervalue) => {
+
+            list.innerHTML = '';
+            
+            let filtered = [];
+
+            if(filtervalue === 'all'){
+                filtered = alltodo;
+            }
+            else if(filtervalue === 'complated'){
+                filtered = alltodo.filter(todo => todo.complated);
+            }
+            else if(filtervalue === 'pending'){
+                filtered = alltodo.filter(todo => !todo.complated);
+            }
+
+            filtered.forEach((todo,index)=>{
+                console.log(todo.title);
+                
+
+                let todos = document.createElement('li');
+                todos.classList.add("todos");
+                todos.innerHTML = `<div>
+                                    <input type="checkbox" id="${index}" ${todo.complated ? "checked" : ""}>
+                                    <label for="${index}" class="t-icon"><i class="fa-solid fa-check"></i></label>
+                                    <label for="${index}">${todo.title}</label>
+
+                                    </div>
+                                    <button class="delete"><i class="fa-solid fa-trash-can"></i></button>`;
+                                        let checkbox = todos.querySelector("input[type='checkbox']");
+                                        checkbox.addEventListener("click",()=>{
+                                            alltodo[index].complated = checkbox.checked;
+                                            settodo();
+                                            createtodo();
+                                            
+                                        })
+
+                                     let deletebtn = todos.querySelector('.delete');
+                                     deletebtn.addEventListener('click',() => {
+                                         alltodo = alltodo.filter((_, i) => i !== index);
+                                         settodo();
+                                         createtodo();
+                                 })
+                    list.appendChild(todos);
+            })
+        
+        }
+
+       
+        
+        
+    </script>
+
+
+</body>
+</html>
+
